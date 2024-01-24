@@ -1,0 +1,12 @@
+.task-menu {
+  position: absolute;
+  display: none;
+  background-color: #f1f1f1;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  z-index: 1;
+}
+
+.task-menu.visible {
+  display: block;
+}
