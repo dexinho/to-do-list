@@ -3,18 +3,6 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.task-list {
-  position: relative;
-  padding: 1rem;
-}
-
-.task-element {
-  font-size: 1.2rem;
-}
-
-.task-element:hover {
-  font-weight: bold;
-  cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
