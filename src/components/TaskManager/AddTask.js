@@ -1,24 +1,29 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+
+import './AddTask.css'
 
 export const AddTask = ({ onTaskAddition }) => {
-  const [newTask, setNewTask] = useState("");
+  const [newTask, setNewTask] = useState({ name: "", isCompleted: false });
+  const taskInputRef = useRef(null);
 
   const handleInputChange = (e) => {
-    setNewTask(e.target.value);
+    setNewTask({ name: e.target.value, isCompleted: false });
   };
 
   const handleAddTask = () => {
-    if (newTask.trim() !== "") {
+    if (newTask.name.trim() !== "") {
       onTaskAddition(newTask);
-      setNewTask("");
+      setNewTask({ name: "", isCompleted: false });
+      taskInputRef.current.focus();
     }
   };
 
   return (
-    <div>
+    <div className="add-task-holder">
       <input
+        ref={taskInputRef}
         type="text"
-        value={newTask}
+        value={newTask.name}
         onChange={handleInputChange}
         placeholder="Enter task..."
       />
