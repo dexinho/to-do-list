@@ -6,9 +6,7 @@ import { TaskManager } from "./components/TaskManager/TaskManager";
 export const App = () => {
   return (
     <div className="container">
-      <div>
         <TaskManager />
-      </div>
     </div>
   );
 };
