@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AddTask } from "./AddTask";
 import { TaskMenu } from "./TaskMenu";
 import { TaskList } from "./TaskList";
+import { getTasks } from "../../utility/getTasks";
+import { postTask } from "../../utility/postTasks";
 
-import "./TaskManager.css"
+import "./TaskManager.css";
 
 export const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
@@ -11,8 +13,27 @@ export const TaskManager = () => {
   const [isTaskMenuVisible, setIsTaskMenuVisible] = useState(false);
   const [taskOffsets, setTaskOffsets] = useState({ x: 0, y: 0 });
   const [isTaskCompleted, setIsTaskCompleted] = useState(false);
+  const [areTasksLoading, setAreTasksLoading] = useState(true);
 
-  const handleAddTask = (task) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const fetchedTasks = await getTasks();
+        setTasks(fetchedTasks);
+        setAreTasksLoading(false);
+      } catch (error) {
+        console.log("Failed to fetch tasks");
+        setAreTasksLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  if (areTasksLoading) return <div>Loading...</div>;
+
+  const handleAddTask = async (task) => {
+    await postTask(task);
     setTasks([...tasks, { name: task.name, isCompleted: false }]);
   };
 

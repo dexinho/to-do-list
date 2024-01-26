@@ -12,8 +12,13 @@ export const TaskMenu = ({
   const taskMenuRenameInputRef = useRef(null);
   const [taskRename, setTaskRename] = useState("");
 
+  const focusAndClearInput = (input) => {
+    input.current.focus();
+    input.current.value = "";
+  };
+
   useEffect(() => {
-    taskMenuRenameInputRef.current.focus();
+    focusAndClearInput(taskMenuRenameInputRef);
     const handleClickOutside = (e) => {
       if (taskMenuRef.current && !taskMenuRef.current.contains(e.target)) {
         onTaskMenuClose();
@@ -21,7 +26,10 @@ export const TaskMenu = ({
     };
 
     if (isVisible) {
-      const menuHeight = parseInt(getComputedStyle(taskMenuRef.current).height, 10)
+      const menuHeight = parseInt(
+        getComputedStyle(taskMenuRef.current).height,
+        10
+      );
       taskMenuRef.current.style.left = `${taskOffsets.x}px`;
       taskMenuRef.current.style.top = `${taskOffsets.y - menuHeight}px`;
       document.addEventListener("mousedown", handleClickOutside);
@@ -38,10 +46,9 @@ export const TaskMenu = ({
     if (option === "Delete") taskMenuOptions.deleteTask();
     else if (option === "Rename") taskMenuOptions.renameTask(taskRename);
     else if (option === "Complete") taskMenuOptions.toCompleteTask(true);
-    else if (option === "Incomplete")
-      taskMenuOptions.toCompleteTask(false);
+    else if (option === "Incomplete") taskMenuOptions.toCompleteTask(false);
 
-    taskMenuRenameInputRef.current.value = "";
+    focusAndClearInput(taskMenuRenameInputRef);
     setTaskRename("");
 
     onTaskMenuClose();
