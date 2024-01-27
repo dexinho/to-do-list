@@ -11,9 +11,9 @@ export const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
   const [isTaskMenuVisible, setIsTaskMenuVisible] = useState(false);
-  const [taskOffsets, setTaskOffsets] = useState({ x: 0, y: 0 });
   const [isTaskCompleted, setIsTaskCompleted] = useState(false);
   const [areTasksLoading, setAreTasksLoading] = useState(true);
+  const [taskOffsets, setTaskOffsets] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchTasks = async () => {
