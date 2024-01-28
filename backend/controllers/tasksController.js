@@ -5,7 +5,6 @@ const tasksController = {};
 tasksController.getTasks = async (req, res) => {
   try {
     const data = await Tasks.find();
-    console.log(data);
     res.json(data);
   } catch (err) {
     console.error("Error fetching data:", err.message);
@@ -16,14 +15,9 @@ tasksController.getTasks = async (req, res) => {
 tasksController.postTask = async (req, res) => {
   const { name, isCompleted } = req.body;
 
-  console.log(req.body);
-
   if (name === undefined || isCompleted === undefined) return;
 
-  const task = new Tasks({
-    name,
-    isCompleted,
-  });
+  const task = new Tasks(req.body);
   try {
     const newTask = await task.save();
     res.status(201).json(newTask);
@@ -49,6 +43,7 @@ tasksController.putTask = async (req, res) => {
 };
 
 tasksController.deleteTask = async (req, res) => {
+  console.log(req.params.id)
   try {
     const deletedTask = await Tasks.findByIdAndDelete(req.params.id);
     if (!deletedTask) {
