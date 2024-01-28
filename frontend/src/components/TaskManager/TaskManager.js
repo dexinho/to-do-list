@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import { AddTask } from "./AddTask";
 import { TaskMenu } from "./TaskMenu";
 import { TaskList } from "./TaskList";
-import { getTasks } from "../../utility/getTasks";
-import { postTask } from "../../utility/postTasks";
+import { deleteTask, getTasks, postTask, putTask } from "../../utility/fetchTasks";
 
 import "./TaskManager.css";
 
 export const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [isTaskMenuVisible, setIsTaskMenuVisible] = useState(false);
   const [isTaskCompleted, setIsTaskCompleted] = useState(false);
   const [areTasksLoading, setAreTasksLoading] = useState(true);
@@ -33,21 +32,27 @@ export const TaskManager = () => {
   if (areTasksLoading) return <div>Loading...</div>;
 
   const handleAddTask = async (task) => {
-    await postTask(task);
-    setTasks([...tasks, { name: task.name, isCompleted: false }]);
+    const postedTaskId = await postTask(task);
+
+    setTasks([
+      ...tasks,
+      { _id: postedTaskId, name: task.name, isCompleted: false },
+    ]);
   };
 
-  const handleIsTaskCompleted = (index) => {
-    if (tasks.length > 0 && typeof index === "number")
-      setIsTaskCompleted(tasks[index].isCompleted);
+  const handleIsTaskCompleted = (taskIndex) => {
+    if (tasks.length > 0 && typeof taskIndex === "number")
+      setIsTaskCompleted(tasks[taskIndex].isCompleted);
     else setIsTaskCompleted(false);
   };
 
-  const handleTaskClick = ({ e, index }) => {
+  const handleTaskClick = ({ e, _id }) => {
+    const currentTaskIndex = tasks.find((task) => task._id === _id);
+
     setTaskOffsets({ x: e.clientX, y: e.clientY });
     setIsTaskMenuVisible(true);
-    setSelectedTaskIndex(index);
-    handleIsTaskCompleted(index);
+    setSelectedTaskId(_id);
+    handleIsTaskCompleted(currentTaskIndex);
   };
 
   const handleTaskMenuClose = () => {
@@ -55,25 +60,29 @@ export const TaskManager = () => {
   };
 
   const taskMenuOptions = {
-    deleteTask: () => {
-      if (typeof selectedTaskIndex !== "number") return;
+    deleteTask: async () => {
+      if (typeof selectedTaskId !== "string") return;
+
+      await deleteTask(selectedTaskId)
 
       setTasks((prevTasks) => [
         ...prevTasks.reduce(
-          (accTasks, task, index) =>
-            index !== selectedTaskIndex ? [...accTasks, task] : accTasks,
+          (accTasks, task) =>
+            task._id !== selectedTaskId ? [...accTasks, task] : accTasks,
           []
         ),
       ]);
     },
 
-    renameTask: (newTaskName) => {
+    renameTask: async (newTaskName) => {
       if (newTaskName.trim() === "") return;
+
+      await putTask(selectedTaskId, newTaskName)
 
       setTasks((prevTasks) => [
         ...prevTasks.reduce(
-          (accTasks, task, index) =>
-            index === selectedTaskIndex
+          (accTasks, task) =>
+            task._id !== selectedTaskId
               ? [
                   ...accTasks,
                   { name: newTaskName.trim(), isCompleted: task.isCompleted },
@@ -84,11 +93,12 @@ export const TaskManager = () => {
       ]);
     },
 
-    toCompleteTask: (isCompleted) => {
+    toCompleteTask: async (isCompleted) => {
+      
       setTasks((prevTasks) => [
         ...prevTasks.reduce(
-          (accTasks, task, index) =>
-            index === selectedTaskIndex
+          (accTasks, task) =>
+            task._id !== selectedTaskId
               ? [...accTasks, { name: task.name, isCompleted }]
               : [...accTasks, task],
           []
