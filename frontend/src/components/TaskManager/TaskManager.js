@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { AddTask } from "./AddTask";
 import { TaskMenu } from "./TaskMenu";
 import { TaskList } from "./TaskList";
-import { deleteTask, getTasks, postTask, putTask } from "../../utility/fetchTasks";
+import {
+  deleteTask,
+  getTasks,
+  postTask,
+  putTask,
+} from "../../utility/fetchTasks";
 
 import "./TaskManager.css";
+import { LoadingAnimation } from "../LoadingAnimation/LoadingAnimation";
 
 export const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
@@ -12,6 +18,7 @@ export const TaskManager = () => {
   const [isTaskMenuVisible, setIsTaskMenuVisible] = useState(false);
   const [isTaskCompleted, setIsTaskCompleted] = useState(false);
   const [areTasksLoading, setAreTasksLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [taskOffsets, setTaskOffsets] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -29,7 +36,7 @@ export const TaskManager = () => {
     fetchTasks();
   }, []);
 
-  if (areTasksLoading) return <div>Loading...</div>;
+  if (areTasksLoading) return <LoadingAnimation isLoading={isLoading} />;
 
   const handleAddTask = async (task) => {
     const postedTaskId = await postTask(task);
@@ -47,7 +54,7 @@ export const TaskManager = () => {
   };
 
   const handleTaskClick = ({ e, _id }) => {
-    const currentTaskIndex = tasks.find((task) => task._id === _id);
+    const currentTaskIndex = tasks.findIndex((task) => task._id === _id);
 
     setTaskOffsets({ x: e.clientX, y: e.clientY });
     setIsTaskMenuVisible(true);
@@ -63,47 +70,46 @@ export const TaskManager = () => {
     deleteTask: async () => {
       if (typeof selectedTaskId !== "string") return;
 
-      await deleteTask(selectedTaskId)
+      try {
+        setIsLoading(true);
+        await deleteTask(selectedTaskId);
 
-      setTasks((prevTasks) => [
-        ...prevTasks.reduce(
-          (accTasks, task) =>
-            task._id !== selectedTaskId ? [...accTasks, task] : accTasks,
-          []
-        ),
-      ]);
+        setTasks((prevTasks) => [
+          ...prevTasks.reduce(
+            (accTasks, task) =>
+              task._id !== selectedTaskId ? [...accTasks, task] : accTasks,
+            []
+          ),
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
     },
 
     renameTask: async (newTaskName) => {
       if (newTaskName.trim() === "") return;
 
-      await putTask(selectedTaskId, newTaskName)
+      const currentTask = tasks.find((task) => task._id === selectedTaskId);
+      currentTask.name = newTaskName;
 
-      setTasks((prevTasks) => [
-        ...prevTasks.reduce(
-          (accTasks, task) =>
-            task._id !== selectedTaskId
-              ? [
-                  ...accTasks,
-                  { name: newTaskName.trim(), isCompleted: task.isCompleted },
-                ]
-              : [...accTasks, task],
-          []
-        ),
-      ]);
+      try {
+        setIsLoading(true);
+        await putTask({ selectedTaskId, currentTask });
+      } finally {
+        setIsLoading(false);
+      }
     },
 
     toCompleteTask: async (isCompleted) => {
-      
-      setTasks((prevTasks) => [
-        ...prevTasks.reduce(
-          (accTasks, task) =>
-            task._id !== selectedTaskId
-              ? [...accTasks, { name: task.name, isCompleted }]
-              : [...accTasks, task],
-          []
-        ),
-      ]);
+      const currentTask = tasks.find((task) => task._id === selectedTaskId);
+      currentTask.isCompleted = isCompleted;
+
+      try {
+        setIsLoading(true);
+        await putTask({ selectedTaskId, currentTask });
+      } finally {
+        setIsLoading(false);
+      }
     },
   };
 
@@ -111,7 +117,6 @@ export const TaskManager = () => {
     <div className="task-manager-holder">
       <h1>Task Tracker</h1>
       <AddTask onTaskAddition={handleAddTask} />
-      <div>{tasks.length > 0 ? "Tasks" : "No tasks"}: </div>
       <TaskList handleTaskClick={handleTaskClick} tasks={tasks} />
       <TaskMenu
         isVisible={isTaskMenuVisible}
@@ -120,6 +125,7 @@ export const TaskManager = () => {
         taskMenuOptions={taskMenuOptions}
         isTaskCompleted={isTaskCompleted}
       />
+      <LoadingAnimation isLoading={isLoading} />
     </div>
   );
 };
