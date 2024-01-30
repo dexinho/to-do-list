@@ -1,0 +1,27 @@
+#loading-animation {
+  display: none;
+  position: fixed;
+  border: 15px solid rgb(61, 46, 46);
+  border-top: 15px solid var(--secondary-color);
+  border-radius: 100%;
+  width: 225px;
+  height: 225px;
+  z-index: 123456789;
+  inset: 50%;
+  translate: -50% -50%;
+}
+
+.animate-loading-circle {
+  display: block !important;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
