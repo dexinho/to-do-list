@@ -32,6 +32,7 @@ tasksController.putTask = async (req, res) => {
     const updatedTask = await Tasks.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+
     if (!updatedTask) {
       return res.status(404).json({ message: "Task not found" });
     }
@@ -43,7 +44,6 @@ tasksController.putTask = async (req, res) => {
 };
 
 tasksController.deleteTask = async (req, res) => {
-  console.log(req.params.id)
   try {
     const deletedTask = await Tasks.findByIdAndDelete(req.params.id);
     if (!deletedTask) {
