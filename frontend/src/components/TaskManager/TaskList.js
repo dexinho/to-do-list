@@ -4,7 +4,7 @@ import "./TaskList.css";
 export const TaskList = ({ handleTaskClick, tasks }) => {
   return (
     <div>
-      <div>{tasks.length > 0 ? "Tasks" : "No tasks"}: </div>
+      <div>{tasks.length > 0 ? "Tasks:" : "No tasks"} </div>
       <ol className="task-list">
         {tasks.map((task) => (
           <li
